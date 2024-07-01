@@ -1,3 +1,1 @@
-<div>애송이</div>
-<div>돼지</div>
-<div>♬</div>
+<h1 class="font-bold text-green-600">안녕하세요</h1>
