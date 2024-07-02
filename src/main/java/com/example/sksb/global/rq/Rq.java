@@ -1,7 +1,9 @@
 package com.example.sksb.global.rq;
 
+import com.example.sksb.domain.member.entity.Member;
 import com.example.sksb.domain.member.service.MemberService;
 import com.example.sksb.global.security.SecurityUser;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.util.Optional;
+
 @Component
 @RequestScope
 @RequiredArgsConstructor
@@ -18,6 +22,9 @@ public class Rq {
     private final MemberService memberService;
     private final HttpServletRequest req; // 요청 
     private final HttpServletResponse resp; // 응답
+    private Member member;
+
+    private EntityManager entityManager;
 
     // 일반
     public boolean isAjax() { // 해당 요청을 isAjax 인지 확인하는 메세지
@@ -107,5 +114,31 @@ public class Rq {
 
     public void setLogin(SecurityUser securityUser) {
         SecurityContextHolder.getContext().setAuthentication(securityUser.genAuthentication());
+    }
+
+    public Member getMember() {
+        if (isLogout()) return null;
+
+        if (member == null) {
+            member = entityManager.getReference(Member.class, getUser().getId());
+        }
+
+        return member;
+    }
+
+    private boolean isLogout() {
+        return !isLogin();
+    }
+
+    private boolean isLogin() {
+        return getUser() != null;
+    }
+
+    private SecurityUser getUser() {
+        return Optional.ofNullable(SecurityContextHolder.getContext())
+                .map(context -> context.getAuthentication())
+                .filter(authentication -> authentication.getPrincipal() instanceof SecurityUser)
+                .map(authentication -> (SecurityUser) authentication.getPrincipal())
+                .orElse(null);
     }
 }
