@@ -5,13 +5,11 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,6 +35,7 @@ public class Member {
     private LocalDateTime modifyDate;
     private String username;
     private String password;
+    private String refreshToken;
 
     public List<String> getAuthoritiesAsStringList() {
         return List.of("ROLE_MEMBER");
