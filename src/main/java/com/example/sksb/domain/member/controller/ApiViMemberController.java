@@ -2,6 +2,7 @@ package com.example.sksb.domain.member.controller;
 
 import com.example.sksb.domain.member.service.MemberService;
 
+import com.example.sksb.global.rq.Rq;
 import com.example.sksb.global.rsData.RsData;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ApiViMemberController {
     private final MemberService memberService;
+    private final Rq rq;
 
     @Getter
     public static class LoginResponsebody {
@@ -69,6 +71,10 @@ public class ApiViMemberController {
                 @Valid @RequestBody LoginRequestBody body
         ) {
             RsData<MemberService.AuthAndMakeTokensResponseBody> authAndMakeTokensRs = memberService.authAndMakeTokens(body.getUsername(), body.getPassword());
+
+            rq.setCrossDomainCookie("refreshToken", authAndMakeTokensRs.getData().getRefreshToken());
+            rq.setCrossDomainCookie("accessToken", authAndMakeTokensRs.getData().getAccessToken());
+            // xss 공격 방지
 
             return RsData.of(
                     authAndMakeTokensRs.getResultCode(),
