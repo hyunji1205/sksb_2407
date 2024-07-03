@@ -1,8 +1,8 @@
 package com.example.sksb.domain.member.controller;
-
 import com.example.sksb.domain.member.dto.MemberDto;
 import com.example.sksb.domain.member.entity.Member;
 import com.example.sksb.domain.member.service.MemberService;
+import com.example.sksb.global.exceptions.GlobalException;
 import com.example.sksb.global.rq.Rq;
 import com.example.sksb.global.rsData.RsData;
 import jakarta.validation.Valid;
@@ -56,7 +56,7 @@ public class ApiV1MemberController {
     public static class MeResponseBody {
         private MemberDto item;
 
-        public  MeResponseBody(Member member) {
+        public MeResponseBody(Member member) {
             this.item = new MemberDto(member);
         }
     }
@@ -65,8 +65,16 @@ public class ApiV1MemberController {
     public RsData<MeResponseBody> getMe() {
         return RsData.of(
                 "200",
-                "네 정보 가져오기 성공",
+                "내 정보 가져오기 성공",
                 new MeResponseBody(rq.getMember())
         );
+    }
+
+    @PostMapping("/logout")
+    public RsData<Void> logout() {
+        rq.removeCrossDomainCookie("accessToken");
+        rq.removeCrossDomainCookie("refreshToken");
+
+        return RsData.of("200", "로그아웃 성공");
     }
 }

@@ -20,28 +20,25 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class Rq {
     private final MemberService memberService;
-    private final HttpServletRequest req; // 요청 
-    private final HttpServletResponse resp; // 응답
+    private final HttpServletRequest req;
+    private final HttpServletResponse resp;
+    private final EntityManager entityManager;
     private Member member;
 
-    private EntityManager entityManager;
-
     // 일반
-    public boolean isAjax() { // 해당 요청을 isAjax 인지 확인하는 메세지
+    public boolean isAjax() {
         if ("application/json".equals(req.getHeader("Accept"))) return true;
         return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
     }
 
     // 쿠키 관련
     public void setCookie(String name, String value) {
-        // 쿠키 설정
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         resp.addCookie(cookie);
     }
 
     public void setCrossDomainCookie(String name, String value) {
-        // CrossDomain 에서 사용 가능한 쿠키 설정
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .sameSite("None")
@@ -88,8 +85,6 @@ public class Rq {
         return Long.parseLong(value);
     }
 
-    
-    // 쿠키 제거
     public void removeCookie(String name) {
         Cookie cookie = getCookie(name);
 
@@ -103,7 +98,7 @@ public class Rq {
 
         ResponseCookie responseCookie = ResponseCookie.from(name, null)
                 .path("/")
-                .maxAge(0) // 만료시간 0
+                .maxAge(0)
                 .sameSite("None")
                 .secure(true)
                 .httpOnly(true)
@@ -140,5 +135,17 @@ public class Rq {
                 .filter(authentication -> authentication.getPrincipal() instanceof SecurityUser)
                 .map(authentication -> (SecurityUser) authentication.getPrincipal())
                 .orElse(null);
+    }
+
+    public void removeCrossDomainCookie(String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, null)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .secure(true)
+                .httpOnly(true)
+                .build();
+
+        resp.addHeader("Set-Cookie", cookie.toString());
     }
 }
